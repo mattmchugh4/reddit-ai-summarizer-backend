@@ -1,6 +1,6 @@
-# from scraper import scraper
+# main.py
 import openai
-
+from comment_scraper import scrape_comments
 
 openai.api_key = "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"
 
@@ -17,17 +17,24 @@ def send_request(input_message):
     return response_message
 
 
-print("Type your requests and press Enter. Type 'exit' or 'quit' to exit the program.")
+print("Enter the Reddit post URL to scrape comments from:")
+post_url = input().strip()
 
+# Scrape comments from the provided URL
+comments = scrape_comments(post_url)
+
+# Print the scraped comments
+print("\nScraped comments:")
+print(comments)
+
+print("\nEnter your question for ChatGPT, or type 'exit' or 'quit' to exit the program.")
 while True:
-    print("___________________________________________________________________________________________________________________________________")
-    input_message = input("Your request: ")
-
+    input_message = input("Your question: ")
     if input_message.lower() in ["exit", "quit"]:
         break
 
-    response_message = send_request(input_message)
-    print()
-    print()
-    print(f"ChatGPT API responded: {response_message}")
-    print()
+    # Append the scraped comments to the question
+    input_message_with_comments = input_message + " " + comments
+
+    response_message = send_request(input_message_with_comments)
+    print(f"\nChatGPT API responded: {response_message}\n")
