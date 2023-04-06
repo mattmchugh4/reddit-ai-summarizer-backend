@@ -1,7 +1,8 @@
 
 # from bs4 import BeautifulSoup
+# import requests
+
 import praw
-import requests
 
 client_id = '8nfmaT3Zt1kPSw7FLFfbZg'
 client_secret = 'T2E4wjZSi1CfkjMBYTEoThWaghoE_w'
@@ -21,6 +22,7 @@ reddit = praw.Reddit(client_id=client_id,
 
 auth_url = reddit.auth.url(
     scopes=['identity', 'read'], state='unique_state', duration='permanent')
+
 print("Authorization URL:", auth_url)
 
 # Replace the response_url with the URL containing your code
@@ -49,9 +51,6 @@ print("Refresh Token:", refresh_token)
 
 # if __name__ == '__main__':
 #     scrape_comments(url)
-
-
-
 
 
 # # # Replace this URL with the URL of the forum page you want to scrape

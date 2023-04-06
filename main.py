@@ -1,8 +1,48 @@
 # main.py
 import openai
 from comment_scraper import scrape_comments
+from web_search import perform_search
+import praw
+import tiktoken
+from flask import Flask, request, render_template
+
+
+app = Flask(__name__)
+
+
+@app.route('/api', methods=['POST'])
+
+def api():
+    # Get the request data
+    data = request.get_json()
+
+    # Do some processing with the data
+    response = process_request(data)
+
+    # Return the response
+    return response
+
+
+def process_request(data):
+    # Process the request data here and return a response
+    return "Your request was processed successfully!"
+
+
+if __name__ == '__main__':
+    app.run()
+
+
 
 openai.api_key = "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"
+
+client_id = '8nfmaT3Zt1kPSw7FLFfbZg'
+client_secret = 'T2E4wjZSi1CfkjMBYTEoThWaghoE_w'
+user_agent = 'python:RedditCommentScraper:v1.0.0 (by /u/SpoonfulOfBlues)'
+refresh_token = '73131276-pKb3q5pYU0EyoMkNrt-M0-IKUA-e1g'
+reddit = praw.Reddit(client_id=client_id,
+                     client_secret=client_secret,
+                     refresh_token=refresh_token,
+                     user_agent=user_agent)
 
 
 def send_request(input_message):
@@ -17,24 +57,30 @@ def send_request(input_message):
     return response_message
 
 
-print("Enter the Reddit post URL to scrape comments from:")
-post_url = input().strip()
-
-# Scrape comments from the provided URL
-comments = scrape_comments(post_url)
-
-# Print the scraped comments
-print("\nScraped comments:")
-print(comments)
-
-print("\nEnter your question for ChatGPT, or type 'exit' or 'quit' to exit the program.")
 while True:
-    input_message = input("Your question: ")
-    if input_message.lower() in ["exit", "quit"]:
-        break
+    search_query = input("Enter your search query: ")
+    search_query = 'reddit best car to buy for money'
+    search_results = perform_search(search_query)
 
-    # Append the scraped comments to the question
-    input_message_with_comments = input_message + " " + comments
+    for result in search_results:
+        print(result)
+        print('------')
 
-    response_message = send_request(input_message_with_comments)
-    print(f"\nChatGPT API responded: {response_message}\n")
+    comments = scrape_comments(reddit, search_results[0][1])
+    # print("\nScraped comments:")
+    print(comments)
+
+    enc = tiktoken.get_encoding("cl100k_base")
+    tokens = enc.encode(comments)
+    print('Number of Tokens:', str(len(tokens)))
+
+
+
+# print("\nEnter your question for ChatGPT, or type 'exit' or 'quit' to exit the program.")
+
+# Append the scraped comments to the question
+# input_message_with_comments = 'Can you answer the following question |' + search + '| using these reddit comments and knowledge you have from other sources' + " " + comments
+# print(input_message_with_comments)
+
+# response_message = send_request(input_message_with_comments)
+# print(f"\nChatGPT API responded: {response_message}\n")
