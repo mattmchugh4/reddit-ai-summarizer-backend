@@ -41,16 +41,17 @@
 
 def format_comment(comment, depth=0):
     if depth > 5 or comment.score <= -3:
-        return ""
+        return []
 
     if depth == 0:
-        formatted_comment = f"COMMENT ({comment.score}): {comment.body}\n"
+        formatted_comment = [f"COMMENT ({comment.score}): {comment.body}"]
     else:
-        formatted_comment = f"REPLY {depth} ({comment.score}): {comment.body}\n"
+        formatted_comment = [
+            f"REPLY {depth} ({comment.score}): {comment.body}"]
 
     if depth < 5:
         for reply in comment.replies:
-            formatted_comment += format_comment(reply, depth + 1)
+            formatted_comment.extend(format_comment(reply, depth + 1))
 
     return formatted_comment
 
@@ -62,18 +63,17 @@ def scrape_comments(reddit, post_url):
     # Replace "more_comments" with actual comments
     post.comments.replace_more(limit=None)
 
-    formatted_comments = ""
+    formatted_comments = []
     for comment in post.comments:
-        formatted_comments += format_comment(comment)
+        formatted_comments.append(format_comment(comment))
 
     return formatted_comments
 
 
+
 # comments = scrape_comments(
 #     reddit, 'https://www.reddit.com/r/whatcarshouldIbuy/comments/ri1d1e/whats_the_best_bang_for_your_buck_cars_that_are/')
-# print(comments[:2000])
-
-
+# print(comments[0])
 
 
 # scrape_comments(

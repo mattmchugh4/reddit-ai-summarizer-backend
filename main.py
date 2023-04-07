@@ -11,16 +11,16 @@ app = Flask(__name__)
 # socketio = SocketIO(app, cors_allowed_origins="*")
 
 
-# Route for HTTP request
-@app.route("/http-call")
+@app.route("/http-call", methods=['POST'])
 def http_call():
-    # This function is executed when an HTTP GET request is made to the "/http-call" endpoint
-    # It returns a JSON object containing a single key-value pair, where the key is "data"
-    # and the value is a string.
-    data = {'data': 'my test'}
-    return jsonify(data)
 
-# Event listener for a client connecting to the server via Socket.IO
+    data = request.json.get('data')
+
+    processed_data = start_query(data)
+
+    return processed_data
+
+
 
 
 # @socketio.on("connect")
