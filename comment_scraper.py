@@ -67,6 +67,7 @@ def scrape_comments(reddit, post_url):
     for comment in post.comments:
         formatted_comments.append(format_comment(comment))
 
+    print(formatted_comments)
     return formatted_comments
 
 

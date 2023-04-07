@@ -48,7 +48,6 @@ def start_query(search_query):
 
     praw_connection = open_reddit_connection()
 
-
     if search_results:
         # comments = scrape_comments(praw_connection, search_results[0][1])
         comments = scrape_comments(
@@ -68,9 +67,30 @@ def start_query(search_query):
     # tokens = enc.encode(comments)
     # print('Number of Tokens:', str(len(tokens)))
 
-    # input_message_with_comments = 'Can you answer the following question |' + search + '| using these reddit comments and knowledge you have from other sources' + " " + comments
+    chatGPT_question = 'Can you analyze these Reddit comments, and give me a summary of each comment chain? This is a post discussing which car is the best value'\
+        'The post is titled "What’s the best bang for your buck cars that are at most 3 years old?" and the original post reads "I’m planning to buy a new car and I’m curious about your thoughts on best bang for your buck cars. It can be any car(cheap or expensive, SUV or sports). The only criteria is it should be at most 3 years old.'\
+        'I will input the comments in an 2D array, formatted like so [[Comment, Reply 1, Reply 2, Etc.],[Comment Chain 2], [Chain 3], etc]. Each comment chain is a reply/discussion regarding the original post.'
 
-    # chat_message = send_request('hello')
-    # response_object['chat_message'] = chat_message
+    filename = "text-input.txt"
+
+
+# Read the content of the text file into a string variable
+    with open(filename, "r") as file:
+        file_content = file.read()
+
+
+# Concatenate the chatGPT_question string with the content of the text file
+    chatGPT_message = chatGPT_question + "\n" + file_content
+
+# Pass the resulting string to the send_request function
+    chat_message = send_request(chatGPT_message)
+
+    response_object['chat_message'] = chat_message
+
+
+    summaries = chat_message.split('\n\n')
+    response_object['summaries'] = summaries
+
+
 
     return jsonify(response_object)
