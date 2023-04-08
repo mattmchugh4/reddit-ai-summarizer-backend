@@ -1,6 +1,5 @@
 import openai
 import praw
-import tiktoken
 from flask import jsonify
 import json
 
@@ -42,55 +41,46 @@ def start_query(search_query):
     response_object = {}
 
     # search_results = perform_search(search_query)
-    search_results = perform_search('test')
+    # search_results = perform_search('test')
 
-    response_object['search_results'] = search_results
+    # response_object['search_results'] = search_results
 
     praw_connection = open_reddit_connection()
 
-    if search_results:
-        # comments = scrape_comments(praw_connection, search_results[0][1])
-        comments = scrape_comments(
-            praw_connection, 'https://www.reddit.com/r/whatcarshouldIbuy/comments/ri1d1e/whats_the_best_bang_for_your_buck_cars_that_are/')
-    else:
-        comments = []
-        print("No search results found.")
+    # comments = scrape_comments(praw_connection, search_results[0][1])
+    comments = scrape_comments(
+        praw_connection, search_query)
 
-    try:
-        json.dumps(comments)
-    except TypeError as e:
-        print("Error:", e)
-        print('hit')
     response_object['comments'] = comments
 
-    # enc = tiktoken.get_encoding("cl100k_base")
-    # tokens = enc.encode(comments)
-    # print('Number of Tokens:', str(len(tokens)))
-
-    chatGPT_question = 'Can you analyze these Reddit comments, and give me a summary of each comment chain? This is a post discussing which car is the best value'\
-        'The post is titled "What’s the best bang for your buck cars that are at most 3 years old?" and the original post reads "I’m planning to buy a new car and I’m curious about your thoughts on best bang for your buck cars. It can be any car(cheap or expensive, SUV or sports). The only criteria is it should be at most 3 years old.'\
-        'I will input the comments in an 2D array, formatted like so [[Comment, Reply 1, Reply 2, Etc.],[Comment Chain 2], [Chain 3], etc]. Each comment chain is a reply/discussion regarding the original post.'
-
-    filename = "text-input.txt"
+    chatGPT_question = 'I am going to input processed Reddit comments to you and I would like you to give me a summary for each comment chain. I will input the comment chains in the following format: "COMMENT (score) Text. REPLY 1 (score) Text. REPLY 2 (score) Text. Etc. Each comment chain will be separated by "\n__break__\n". Each comment chain is a reply/discussion regarding the original post. In your output, separate each comment chain summary with two blank lines. Now, please ask me any questions about this input that you don’t understand.'
 
 
-# Read the content of the text file into a string variable
-    with open(filename, "r") as file:
-        file_content = file.read()
+        # f'The post is titled "{comments["title"]}" and the original post reads "{comments["initial_post"]}"'\
+        # 'Do you have any questions?'\
 
-
-# Concatenate the chatGPT_question string with the content of the text file
-    chatGPT_message = chatGPT_question + "\n" + file_content
+    # chatGPT_message = chatGPT_question + "\n" + comments['comment_strings'][0]
 
 # Pass the resulting string to the send_request function
-    chat_message = send_request(chatGPT_message)
+    # chat_message = send_request(chatGPT_message)
+    # print(chatGPT_question)
+    chat_message = send_request(chatGPT_question)
+    print(chat_message)
+    while True:
+        print()
+        reply = input()
+        if reply == 'break':
+            break
+        else:
+            clarify = send_request(reply)
+            print(clarify)
 
-    response_object['chat_message'] = chat_message
+    analyzed_comments = send_request(comments['comment_strings'][0])
+    print(analyzed_comments)
 
+    response_object['chat_message'] = analyzed_comments
 
-    summaries = chat_message.split('\n\n')
+    summaries = analyzed_comments.split('\n\n')
     response_object['summaries'] = summaries
-
-
 
     return jsonify(response_object)

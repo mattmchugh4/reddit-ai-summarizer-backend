@@ -11,16 +11,28 @@ app = Flask(__name__)
 # socketio = SocketIO(app, cors_allowed_origins="*")
 
 
+@app.errorhandler(ConnectionRefusedError)
+def connection_refused_error_handler(error):
+    print('Connection refused:', error)
+    return '', 500
+
+
 @app.route("/http-call", methods=['POST'])
 def http_call():
+    try:
+        data = request.json.get('data')
+        processed_data = start_query(data)
+        return processed_data
+    except ConnectionRefusedError as e:
+        print('Connection refused:', e)
+        raise e
 
-    data = request.json.get('data')
-
-    processed_data = start_query(data)
-
-    return processed_data
 
 
+if __name__ == '__main__':
+    app.run(debug=True, port=5001)
+
+    # socketio.run(app, debug=True, port=5001)
 
 
 # @socketio.on("connect")
@@ -53,10 +65,3 @@ def http_call():
 #     # to all connected clients informing them of the disconnection.
 #     print("user disconnected")
 #     emit("disconnect", f"user {request.sid} disconnected", broadcast=True)
-
-
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5001)
-
-    # socketio.run(app, debug=True, port=5001)
