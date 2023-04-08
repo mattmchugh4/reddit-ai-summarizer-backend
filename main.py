@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify
 # from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 
-from handle_query import start_query
+# Import the synchronous wrapper function
+from handle_query import start_query_sync
 
 
 app = Flask(__name__)
@@ -21,7 +22,8 @@ def connection_refused_error_handler(error):
 def http_call():
     try:
         data = request.json.get('data')
-        processed_data = start_query(data)
+        # Call the synchronous wrapper function
+        processed_data = start_query_sync(data)
         return processed_data
     except ConnectionRefusedError as e:
         print('Connection refused:', e)
