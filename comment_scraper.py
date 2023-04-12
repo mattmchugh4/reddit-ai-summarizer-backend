@@ -1,7 +1,6 @@
 
 
 # import praw
-import tiktoken
 
 
 # client_id = '8nfmaT3Zt1kPSw7FLFfbZg'
@@ -13,7 +12,7 @@ import tiktoken
 #                      refresh_token=refresh_token,
 #                      user_agent=user_agent)
 
-enc = tiktoken.get_encoding("cl100k_base")
+
 
 
 # function that prints all comments in easy to read format
@@ -40,7 +39,10 @@ enc = tiktoken.get_encoding("cl100k_base")
 #         print()
 
 #     return post.comments
+from datetime import datetime
 
+import tiktoken
+enc = tiktoken.get_encoding("cl100k_base")
 
 def format_comment(comment, depth=0):
 
@@ -93,6 +95,13 @@ def scrape_comments(reddit, post_url):
 
     comments['title'] = post.title
     comments['initial_post'] = post.selftext
+
+    post_date = post.created_utc
+
+
+    post_date_formatted = datetime.utcfromtimestamp(post_date).strftime('%m;%d:%Y')
+
+    comments['post_date'] = post_date_formatted
 
     comments['formatted_comments'] = formatted_comments
     comments['comment_strings'] = comment_string_split

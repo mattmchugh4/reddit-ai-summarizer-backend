@@ -9,7 +9,7 @@ import httpx
 from comment_scraper import scrape_comments
 from web_search import perform_search
 
-openai.api_key = "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"
+openai.api_key = "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"
 
 
 def open_reddit_connection():
@@ -24,23 +24,19 @@ def open_reddit_connection():
     return praw_connection
 
 
-async def send_request_async(input_message):
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            "https://api.openai.com/v1/engines/gpt-3.5-turbo/completions",
-            headers={"Authorization": f"Bearer {openai.api_key}"},
-            json={
-                "model": "gpt-3.5-turbo",
-                "messages": [{"role": "user", "content": input_message}],
-            },
-        )
-    print(response.json())
-    response_message = response.json(
-    )["choices"][0]["message"]["content"].strip()
+def send_request(input_message):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "user", "content": input_message}
+        ]
+    )
+
+    response_message = response.choices[0].message['content'].strip()
     return response_message
 
 
-async def start_query_async(search_query):
+def start_query(search_query):
     response_object = {}
 
     # search_results = perform_search(search_query)
@@ -53,50 +49,116 @@ async def start_query_async(search_query):
 
     response_object['formatted_comments'] = comments['formatted_comments']
     response_object['post_title'] = comments['title']
-    response_object['post_title'] = comments["initial_post"]
-
-    chatGPT_summaries = []
-    chatGPT_question = 'Can you summarize the main points in this Reddit comment chain: '
-    index = 0
+    response_object['initial_post'] = comments["initial_post"]
+    response_object['post_date'] = comments["post_date"]
 
 
-    tasks = []
+    # chatGPT_summaries = []
+    # chatGPT_question = 'Can you summarize the main points in this Reddit comment chain: '
 
-    for comment_chain in comments['formatted_comments']:
-        if index > 10:
-            break
-        index += 1
-        joined_comments = "\n".join(comment_chain)
-        task = send_request_async(chatGPT_question + "\n" + joined_comments)
-        tasks.append(task)
+    # index = 0
+    # for comment_chain in comments['formatted_comments']:
+    #     if index > 10:
+    #         break
+    #     index += 1
+    #     joined_comments = "\n".join(comment_chain)
+    #     task = send_request(chatGPT_question + "\n" + joined_comments)
 
-    chatGPT_summaries = await asyncio.gather(*tasks)
+    # all_summaries = "\n".join(chatGPT_summaries)
 
-    all_summaries = "\n".join(chatGPT_summaries)
+    # chatGPT_question_summary = (
+    #     "I am researching the best way to get a job. Can you analyze these Reddit comment chain summaries and give me the best ?"
+    # )
 
-    chatGPT_question_summary = (
-        "I am researching the best way to get a job. Can you analyze these Reddit comment chain summaries and give me the best ?"
-    )
+    # new_summary = send_request(chatGPT_question_summary + "\n" + all_summaries)
+    # print(new_summary)
 
-    new_summary = await send_request_async(chatGPT_question_summary + "\n" + all_summaries)
-    print(new_summary)
+    # chatGPT_question_overall_summary = (
+    #     "Can you analyze these summaries of Reddit post comment chains and provide me an overall summary of the post?"
+    # )
 
-    chatGPT_question_overall_summary = (
-        "Can you analyze these summaries of Reddit post comment chains and provide me an overall summary of the post?"
-    )
+    # overall_summary = send_request(
+    #     chatGPT_question_overall_summary + "\n" + all_summaries
+    # )
 
-    overall_summary = await send_request_async(
-        chatGPT_question_overall_summary + "\n" + all_summaries
-    )
-
-    response_object["summaries"] = chatGPT_summaries
-    response_object["overall_summary"] = overall_summary
+    # response_object["summaries"] = chatGPT_summaries
+    # response_object["overall_summary"] = overall_summary
 
     return jsonify(response_object)
 
 
-def start_query_sync(search_query):
-    return asyncio.run(start_query_async(search_query))
+# async def start_query_async(search_query):
+#     response_object = {}
+
+#     # search_results = perform_search(search_query)
+#     # response_object['search_results'] = search_results
+
+#     praw_connection = open_reddit_connection()
+
+#     comments = scrape_comments(
+#         praw_connection, search_query)
+
+#     response_object['formatted_comments'] = comments['formatted_comments']
+#     response_object['post_title'] = comments['title']
+#     response_object['post_title'] = comments["initial_post"]
+
+#     chatGPT_summaries = []
+#     chatGPT_question = 'Can you summarize the main points in this Reddit comment chain: '
+#     index = 0
+
+#     tasks = []
+
+#     for comment_chain in comments['formatted_comments']:
+#         if index > 10:
+#             break
+#         index += 1
+#         joined_comments = "\n".join(comment_chain)
+#         task = send_request_async(chatGPT_question + "\n" + joined_comments)
+#         tasks.append(task)
+
+#     chatGPT_summaries = await asyncio.gather(*tasks)
+
+#     all_summaries = "\n".join(chatGPT_summaries)
+
+#     chatGPT_question_summary = (
+#         "I am researching the best way to get a job. Can you analyze these Reddit comment chain summaries and give me the best ?"
+#     )
+
+#     new_summary = await send_request_async(chatGPT_question_summary + "\n" + all_summaries)
+#     print(new_summary)
+
+#     chatGPT_question_overall_summary = (
+#         "Can you analyze these summaries of Reddit post comment chains and provide me an overall summary of the post?"
+#     )
+
+#     overall_summary = await send_request_async(
+#         chatGPT_question_overall_summary + "\n" + all_summaries
+#     )
+
+#     response_object["summaries"] = chatGPT_summaries
+#     response_object["overall_summary"] = overall_summary
+
+#     return jsonify(response_object)
+
+
+# def start_query_sync(search_query):
+#     return asyncio.run(start_query_async(search_query))
+
+
+# async def send_request_async(input_message):
+#     async with httpx.AsyncClient() as client:
+#         response = await client.post(
+#             "https://api.openai.com/v1/engines/gpt-3.5-turbo/completions",
+#             headers={"Authorization": f"Bearer {openai.api_key}"},
+#             json={
+#                 "model": "gpt-3.5-turbo",
+#                 "messages": [{"role": "user", "content": input_message}],
+#             },
+#         )
+#     print(response.json())
+#     response_message = response.json(
+#     )["choices"][0]["message"]["content"].strip()
+#     return response_message
     # chatGPT_question = 'I am going to input processed Reddit comments to you and I would like you to give me a summary for each comment chain. I will input the comment chains in the following format: "COMMENT (score) Text. REPLY 1 (score) Text. REPLY 2 (score) Text. Etc. Each comment chain will be separated by "\n__break__\n". Each comment chain is a reply/discussion regarding the original post. In your output, separate each comment chain summary with two blank lines. Now, please ask me any questions about this input that you don’t understand.'
 
     # f'The post is titled "{comments["title"]}" and the original post reads "{comments["initial_post"]}"'\

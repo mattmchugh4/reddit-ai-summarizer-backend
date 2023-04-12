@@ -37,20 +37,7 @@ reddit_user = reddit.user.me()
 refresh_token = reddit_user.auth.refresh_token
 print("Refresh Token:", refresh_token)
 
-# # Replace the URL with the desired Reddit post URL
-# url = 'https://www.reddit.com/r/subreddit/comments/abcdef/post_title/'
 
-
-# def scrape_comments(url):
-#     submission = reddit.submission(url=url)
-#     submission.comments.replace_more(limit=None)
-
-#     for comment in submission.comments.list():
-#         print(comment.body)
-
-
-# if __name__ == '__main__':
-#     scrape_comments(url)
 
 
 # # # Replace this URL with the URL of the forum page you want to scrape
