@@ -9,6 +9,9 @@ import httpx
 from comment_scraper import scrape_comments
 from web_search import perform_search
 
+import tiktoken
+enc = tiktoken.get_encoding("cl100k_base")
+
 openai.api_key = "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"
 
 
@@ -43,6 +46,7 @@ def start_query(search_query):
     # response_object['search_results'] = search_results
 
     praw_connection = open_reddit_connection()
+    print('Scraping comments...')
 
     comments = scrape_comments(
         praw_connection, search_query)
@@ -52,37 +56,50 @@ def start_query(search_query):
     response_object['initial_post'] = comments["initial_post"]
     response_object['post_date'] = comments["post_date"]
 
+    response_object['tokens'] = 0
 
-    # chatGPT_summaries = []
-    # chatGPT_question = 'Can you summarize the main points in this Reddit comment chain: '
+    print('Summarizing Chains...')
 
-    # index = 0
-    # for comment_chain in comments['formatted_comments']:
-    #     if index > 10:
-    #         break
-    #     index += 1
-    #     joined_comments = "\n".join(comment_chain)
-    #     task = send_request(chatGPT_question + "\n" + joined_comments)
+    chatGPT_summaries = []
 
-    # all_summaries = "\n".join(chatGPT_summaries)
+    chatGPT_question = 'Can you concisely summarize the main points for the Reddit comment chain that is pasted below?' \
+        f'This comment chain is in response to a post ,  Title: {comments["title"]}; Body: {comments["initial_post"]}.'
 
-    # chatGPT_question_summary = (
-    #     "I am researching the best way to get a job. Can you analyze these Reddit comment chain summaries and give me the best ?"
-    # )
+    index = 0
+    for comment_chain in comments['formatted_comments']:
+        if index > 20:
+            break
+        print(index)
+        index += 1
+        joined_comments = "\n".join(comment_chain)
 
-    # new_summary = send_request(chatGPT_question_summary + "\n" + all_summaries)
-    # print(new_summary)
+        prompt = chatGPT_question + "\n" + joined_comments
+        if len(enc.encode(prompt)) > 3500:
+            print('too long')
+            continue
+        response_object['tokens'] += len(enc.encode(prompt))
 
-    # chatGPT_question_overall_summary = (
-    #     "Can you analyze these summaries of Reddit post comment chains and provide me an overall summary of the post?"
-    # )
+        summary = send_request(prompt)
+        response_object['tokens'] += len(enc.encode(summary))
 
-    # overall_summary = send_request(
-    #     chatGPT_question_overall_summary + "\n" + all_summaries
-    # )
+        chatGPT_summaries.append(summary)
 
-    # response_object["summaries"] = chatGPT_summaries
-    # response_object["overall_summary"] = overall_summary
+    all_summaries = "\n".join(chatGPT_summaries)
+
+    print('Overall Summary...')
+
+    chatGPT_question_overall_summary = (
+        "Can you analyze these summaries of Reddit post comment chains and provide me an overall summary of the post?" + "\n" + all_summaries
+    )
+    response_object['tokens'] += len(
+        enc.encode(chatGPT_question_overall_summary))
+
+    overall_summary = send_request(chatGPT_question_overall_summary)
+    response_object['tokens'] += len(
+        enc.encode(overall_summary))
+
+    response_object["summaries"] = chatGPT_summaries
+    response_object["overall_summary"] = overall_summary
 
     return jsonify(response_object)
 

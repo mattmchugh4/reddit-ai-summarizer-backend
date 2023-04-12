@@ -13,8 +13,6 @@
 #                      user_agent=user_agent)
 
 
-
-
 # function that prints all comments in easy to read format
 # def print_comment(comment, depth=0):
 #     print("  " * depth, comment.body)
@@ -44,7 +42,11 @@ from datetime import datetime
 import tiktoken
 enc = tiktoken.get_encoding("cl100k_base")
 
+
 def format_comment(comment, depth=0):
+
+    if comment.author is None or comment.body in ["[deleted]", "[removed]"]:
+        return []
 
     if depth > 5 or comment.score <= -3:
         return []
@@ -98,8 +100,8 @@ def scrape_comments(reddit, post_url):
 
     post_date = post.created_utc
 
-
-    post_date_formatted = datetime.utcfromtimestamp(post_date).strftime('%m;%d:%Y')
+    post_date_formatted = datetime.utcfromtimestamp(
+        post_date).strftime('%m/%d/%Y')
 
     comments['post_date'] = post_date_formatted
 
