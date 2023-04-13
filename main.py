@@ -4,12 +4,14 @@ from flask_cors import CORS
 
 # Import the synchronous wrapper function
 from handle_query import start_query
+from web_search import perform_search
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 CORS(app, resources={r"/*": {"origins": "*"}})
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*",
+                    engineio_logger=True, logger=True)
 
 
 @app.errorhandler(ConnectionRefusedError)
@@ -28,6 +30,16 @@ def http_call():
     except ConnectionRefusedError as e:
         print('Connection refused:', e)
         raise e
+
+
+@socketio.on("search")
+def run_search(data):
+    search_query = data.get('searchQuery')
+
+    def emit_search_result(result):
+        socketio.emit('search_result', {'result': result}, broadcast=True)
+
+    perform_search(search_query, emit_function=emit_search_result)
 
 
 @socketio.on("connect")

@@ -7,7 +7,6 @@ import httpx
 
 
 from comment_scraper import scrape_comments
-from web_search import perform_search
 
 import tiktoken
 enc = tiktoken.get_encoding("cl100k_base")
@@ -42,9 +41,6 @@ def send_request(input_message):
 def start_query(search_query):
     response_object = {}
 
-    # search_results = perform_search(search_query)
-    # response_object['search_results'] = search_results
-
     praw_connection = open_reddit_connection()
     print('Scraping comments...')
 
@@ -66,6 +62,30 @@ def start_query(search_query):
         f'This comment chain is in response to a post ,  Title: {comments["title"]}; Body: {comments["initial_post"]}.'
 
     index = 0
+
+    prompts = []
+
+    # for comment_chain in comments['formatted_comments']:
+    #     if index > 20:
+    #         break
+    #     print(index)
+    #     index += 1
+    #     joined_comments = "\n".join(comment_chain)
+
+    #     prompt = chatGPT_question + "\n" + joined_comments
+    #     if len(enc.encode(prompt)) > 3500:
+    #         print('too long')
+    #         continue
+    #     response_object['tokens'] += len(enc.encode(prompt))
+
+    #     prompts.append(prompt)
+
+    # responses = send_request_batch(prompts)
+
+    # for summary in responses:
+    #     response_object['tokens'] += len(enc.encode(summary))
+    #     chatGPT_summaries.append(summary)
+
     for comment_chain in comments['formatted_comments']:
         if index > 20:
             break
