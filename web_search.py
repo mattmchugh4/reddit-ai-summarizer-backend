@@ -24,7 +24,7 @@ def get_google_search_results(url):
     return results
 
 
-def perform_search(search_query, emit_function=None):
+def perform_search(search_query, emit_function):
     query = urllib.parse.quote_plus(search_query)
     url = f"https://www.google.com/search?q={query}+site:reddit.com&oq={query}+site:reddit.com&aqs=chrome.0.35i39l2j0l4j46j69i60.1467j0j7&sourceid=chrome&ie=UTF-8"
     results = get_google_search_results(url)

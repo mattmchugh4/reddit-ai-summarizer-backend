@@ -45,7 +45,7 @@ enc = tiktoken.get_encoding("cl100k_base")
 
 def format_comment(comment, depth=0):
 
-    if comment.author is None or comment.body in ["[deleted]", "[removed]"]:
+    if comment.body in ["[deleted]", "[removed]"]:
         return []
 
     if depth > 5 or comment.score <= -3:
@@ -107,6 +107,10 @@ def scrape_comments(reddit, post_url):
 
     comments['formatted_comments'] = formatted_comments
     comments['comment_strings'] = comment_string_split
+
+    for comment in formatted_comments:
+        print(comment)
+        print('\n')
 
     return comments
 

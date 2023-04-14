@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*",
-                    engineio_logger=True, logger=True)
+                    engineio_logger=True, logger=True, ping_timeout=120)
 
 
 @app.errorhandler(ConnectionRefusedError)
@@ -22,7 +22,6 @@ def connection_refused_error_handler(error):
 
 @app.route("/http-call", methods=['POST'])
 def http_call():
-    print('sever hit')
     try:
         data = request.json.get('data')
         processed_data = start_query(data)
@@ -37,9 +36,19 @@ def run_search(data):
     search_query = data.get('searchQuery')
 
     def emit_search_result(result):
-        socketio.emit('search_result', {'result': result}, broadcast=True)
+        socketio.emit('search_result', {'result': result})
 
-    perform_search(search_query, emit_function=emit_search_result)
+    perform_search(search_query, emit_search_result)
+
+
+@socketio.on('searchUrl')
+def handle_request_data(data):
+    input_url = data.get('inputUrl')
+
+    def emit_processed_data(processed_data):
+        socketio.emit('comment-data', processed_data)
+
+    start_query(input_url, emit_processed_data)
 
 
 @socketio.on("connect")
