@@ -10,6 +10,7 @@ from comment_scraper import scrape_comments
 import tiktoken
 enc = tiktoken.get_encoding("cl100k_base")
 
+
 def open_reddit_connection():
     client_id = '8nfmaT3Zt1kPSw7FLFfbZg'
     client_secret = 'T2E4wjZSi1CfkjMBYTEoThWaghoE_w'
@@ -22,25 +23,25 @@ def open_reddit_connection():
     return praw_connection
 
 
-# openai.api_key = "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"
+openai.api_key = "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"
 
 def send_request(input_message):
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "user", "content": input_message}
-            ]
-        )
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "user", "content": input_message}
+        ]
+    )
 
-        response_message = response.choices[0].message['content'].strip()
-        return response_message
+    response_message = response.choices[0].message['content'].strip()
+    return response_message
 
 
-def start_query(search_query, emit_processed_data):
+def start_query(search_query, emit_processed_data, emit_status_message):
     response_object = {}
 
     praw_connection = open_reddit_connection()
-    print('Scraping comments...')
+    emit_status_message('Scraping comments...')
 
     comments = scrape_comments(
         praw_connection, search_query)
@@ -52,26 +53,25 @@ def start_query(search_query, emit_processed_data):
 
     response_object['tokens'] = 0
 
-    print('Summarizing Chains...')
+    emit_status_message('Summarizing Comment Chains...')
 
-    format_chatGPT_inputs(comments['formatted_comments'])
+    chatGPT_summaries = format_chatGPT_inputs(comments['formatted_comments'])
 
+    all_summaries = "\n".join(chatGPT_summaries)
 
-    # all_summaries = "\n".join(chatGPT_summaries)
+    emit_status_message('Generating Overall Summary...')
 
-    # print('Overall Summary...')
+    chatGPT_question_overall_summary = (
+        "Can you analyze these summaries of Reddit post comment chains and provide me an overall summary of the post?" + "\n" + all_summaries
+    )
+    response_object['tokens'] += len(
+        enc.encode(chatGPT_question_overall_summary))
 
-    # chatGPT_question_overall_summary = (
-    #     "Can you analyze these summaries of Reddit post comment chains and provide me an overall summary of the post?" + "\n" + all_summaries
-    # )
-    # response_object['tokens'] += len(
-    #     enc.encode(chatGPT_question_overall_summary))
+    overall_summary = send_request(chatGPT_question_overall_summary)
+    response_object['tokens'] += len(
+        enc.encode(overall_summary))
 
-    # overall_summary = send_request(chatGPT_question_overall_summary)
-    # response_object['tokens'] += len(
-    #     enc.encode(overall_summary))
+    response_object["summaries"] = chatGPT_summaries
+    response_object["overall_summary"] = overall_summary
 
-    # response_object["summaries"] = chatGPT_summaries
-    # response_object["overall_summary"] = overall_summary
-
-    # emit_processed_data(response_object)
+    emit_processed_data(response_object)

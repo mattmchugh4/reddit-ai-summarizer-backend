@@ -48,7 +48,10 @@ def handle_request_data(data):
     def emit_processed_data(processed_data):
         socketio.emit('comment-data', processed_data)
 
-    start_query(input_url, emit_processed_data)
+    def emit_status_message(status_message):
+        socketio.emit('status-message', status_message)
+
+    start_query(input_url, emit_processed_data, emit_status_message)
 
 
 @socketio.on("connect")

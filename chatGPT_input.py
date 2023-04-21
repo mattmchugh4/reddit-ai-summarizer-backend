@@ -1,13 +1,17 @@
 import json
 import asyncio
 from api_request_parallel_processor import process_api_requests_from_file
+import tiktoken
+enc = tiktoken.get_encoding("cl100k_base")
 
 
 async def make_async_chatGPT_request():
+    open("results.jsonl", "w").close()
+
     await process_api_requests_from_file(
         requests_filepath="requests_to_process.jsonl",
         save_filepath="results.jsonl",
-        request_url="https://api.openai.com/v1/engines/gpt-3.5-turbo/completions",
+        request_url="https://api.openai.com/v1/chat/completions",
         api_key="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",
         max_requests_per_minute=1500,
         max_tokens_per_minute=6250000,
@@ -15,8 +19,16 @@ async def make_async_chatGPT_request():
         max_attempts=5,
         logging_level=20,
     )
-{"prompt":
-    "Can you concisely summarize the main points for the Reddit comment chain that is pasted below?\nCOMMENT (21): Basically Any car from Toyota.", "max_tokens": 50, "temperature": 0.7}
+    summaries = []
+    comments = []
+    with open("results.jsonl", "r") as f:
+        for line in f:
+            response = json.loads(line)
+            comments.append(response[0]['messages'][0]['content'])
+            summaries.append(response[1]['choices'][0]['message']['content'])
+    return {'summaries': summaries, 'comments': comments}
+
+
 
 
 def format_chatGPT_inputs(comment_array):
@@ -27,19 +39,22 @@ def format_chatGPT_inputs(comment_array):
         # f'This comment chain is in response to a post titled: {comments["title"]};.'
     # f'This comment chain is in response to a post ,  Title: {comments["title"]}; Body: {comments["initial_post"]}.'
 
-
     formatted_requests = []
     index = 0
     for comment_chain in comment_array:
         if len(comment_chain) == 0:
             continue
-        if index > 3:
+        if index > 2:
             break
         index += 1
         joined_comments = "\n".join(comment_chain)
 
         user_message = chatGPT_question + "\n" + joined_comments
-        # print(prompt)
+
+        if len(enc.encode(user_message)) > 3500:
+            print('too long')
+            continue
+
         request_object = {
             "model": "gpt-3.5-turbo",
             "messages": [
@@ -53,23 +68,4 @@ def format_chatGPT_inputs(comment_array):
         for request in formatted_requests:
             outfile.write(json.dumps(request) + "\n")
 
-    asyncio.run(make_async_chatGPT_request())
-
-    # prompts = []
-
-    # for comment_chain in comments['formatted_comments']:
-    #     if index > 10:
-    #         break
-    #     index += 1
-    #     joined_comments = "\n".join(comment_chain)
-
-    #     prompt = chatGPT_question + "\n" + joined_comments
-    #     if len(enc.encode(prompt)) > 3500:
-    #         print('too long')
-    #         continue
-    #     response_object['tokens'] += len(enc.encode(prompt))
-
-    #     summary = send_request(prompt)
-    #     response_object['tokens'] += len(enc.encode(summary))
-
-    #     chatGPT_summaries.append(summary)
+    return asyncio.run(make_async_chatGPT_request())

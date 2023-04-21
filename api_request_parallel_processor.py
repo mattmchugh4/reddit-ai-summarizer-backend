@@ -299,7 +299,7 @@ class APIRequest:
                 if "Rate limit" in response["error"].get("message", ""):
                     status_tracker.time_of_last_rate_limit_error = time.time()
                     status_tracker.num_rate_limit_errors += 1
-                    status_tracker.num_api_errors -= 1  # rate limit errors are counted separately
+                    status_tracker.num_api_errors -= 1
 
         except Exception as e:  # catching naked exceptions is bad practice, but in this case we'll log & save them
             logging.warning(
@@ -443,26 +443,3 @@ if __name__ == "__main__":
             logging_level=int(args.logging_level),
         )
     )
-
-
-"""
-APPENDIX
-
-The example requests file at openai-cookbook/examples/data/example_requests_to_parallel_process.jsonl contains 10,000 requests to text-embedding-ada-002.
-
-It was generated with the following code:
-
-```python
-import json
-
-filename = "data/example_requests_to_parallel_process.jsonl"
-n_requests = 10_000
-jobs = [{"model": "text-embedding-ada-002", "input": str(x) + "\n"} for x in range(n_requests)]
-with open(filename, "w") as f:
-    for job in jobs:
-        json_string = json.dumps(job)
-        f.write(json_string + "\n")
-```
-
-As with all jsonl files, take care that newlines in the content are properly escaped (json.dumps does this automatically).
-"""
