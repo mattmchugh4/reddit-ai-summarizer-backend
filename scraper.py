@@ -1,41 +1,51 @@
 
-# from bs4 import BeautifulSoup
-# import requests
 
 import praw
+from requests.auth import HTTPBasicAuth
+import requests
 
+# Reddit app credentials
 client_id = '8nfmaT3Zt1kPSw7FLFfbZg'
 client_secret = 'T2E4wjZSi1CfkjMBYTEoThWaghoE_w'
-user_agent = 'python: RedditCommentScraper: v1.0.0 (by / u/SpoonfulOfBlues)'
-username = 'SpoonfulOfBlues'
-password = 'zIqtus-watbem-jygqa6'
+user_agent = 'python:RedditCommentScraper:v1.0.0 (by /u/SpoonfulOfBlues)'
 redirect_uri = 'http://localhost:8080'
 
-
+# Set up Reddit instance with PRAW
 reddit = praw.Reddit(client_id=client_id,
                      client_secret=client_secret,
                      user_agent=user_agent,
-                     username=username,
-                     password=password,
                      redirect_uri=redirect_uri)
 
+# Step 1: Generate the authorization URL
+auth_url = reddit.auth.url(scopes=['identity', 'read'], state='unique_state', duration='permanent')
+print("Authorization URL: ", auth_url)
 
-auth_url = reddit.auth.url(
-    scopes=['identity', 'read'], state='unique_state', duration='permanent')
+# Step 2: Ask the user to enter the full URL they get redirected to (containing the authorization code)
+response_url = input("Paste the full redirect URL here: ")
 
-print("Authorization URL:", auth_url)
-
-# Replace the response_url with the URL containing your code
-response_url = 'http://localhost:8080/?state=unique_state&code=3rcy6JrarjXQrMaKJ9K7E86ADgDviQ#_'
-
+# Step 3: Extract the authorization code from the response URL
 code = response_url.split("code=")[1].split("#")[0]
-access_token = reddit.auth.authorize(code)
-print("Access Token:", access_token)
 
-# Get the refresh token
-reddit_user = reddit.user.me()
-refresh_token = reddit_user.auth.refresh_token
-print("Refresh Token:", refresh_token)
+# Step 4: Exchange the authorization code for an access token
+auth = HTTPBasicAuth(client_id, client_secret)
+data = {
+    'grant_type': 'authorization_code',
+    'code': code,
+    'redirect_uri': redirect_uri
+}
+headers = {'User-Agent': user_agent}
+
+response = requests.post('https://www.reddit.com/api/v1/access_token', auth=auth, data=data, headers=headers)
+
+# Step 5: Print the response which contains the access token and refresh token
+print("Response: ", response.json())
+
+# Optionally extract and print the refresh token
+if 'refresh_token' in response.json():
+    refresh_token = response.json().get('refresh_token')
+    print("Your Refresh Token: ", refresh_token)
+else:
+    print("No Refresh Token found.")
 
 
 

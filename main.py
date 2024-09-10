@@ -13,7 +13,6 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*",
                     engineio_logger=True, logger=True, ping_timeout=120)
 
-
 @app.errorhandler(ConnectionRefusedError)
 def connection_refused_error_handler(error):
     print('Connection refused:', error)

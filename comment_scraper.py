@@ -66,6 +66,7 @@ def format_comment(comment, depth=0):
 
 def scrape_comments(reddit, post_url):
     post_id = post_url.split('/')[-3]
+
     post = reddit.submission(id=post_id)
 
     # Replace "more_comments" with actual comments
