@@ -1,0 +1,5 @@
+{
+  "css.lint.duplicateProperties": "warning",
+  "css.lint.float": "warning",
+  "css.lint.boxModel": "error"
+}
