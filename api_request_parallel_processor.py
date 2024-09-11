@@ -91,17 +91,18 @@ The script is structured as follows:
     - Run main()
 """
 
-# imports
-import aiohttp  # for making API calls concurrently
 import argparse  # for running script from command line
 import asyncio  # for running API calls concurrently
 import json  # for saving results to a jsonl file
 import logging  # for logging rate limit warnings and other messages
 import os  # for reading API key
 import re  # for matching endpoint from request URL
-import tiktoken  # for counting tokens
 import time  # for sleeping after rate limit is hit
 from dataclasses import dataclass  # for storing API inputs, outputs, and metadata
+
+# imports
+import aiohttp  # for making API calls concurrently
+import tiktoken  # for counting tokens
 
 
 async def process_api_requests_from_file(
@@ -158,7 +159,8 @@ async def process_api_requests_from_file(
                 if not queue_of_requests_to_retry.empty():
                     next_request = queue_of_requests_to_retry.get_nowait()
                     logging.debug(
-                        f"Retrying request {next_request.task_id}: {next_request}")
+                        f"Retrying request {next_request.task_id}: {next_request}"
+                    )
                 elif file_not_finished:
                     try:
                         # get new request
@@ -167,13 +169,15 @@ async def process_api_requests_from_file(
                             task_id=next(task_id_generator),
                             request_json=request_json,
                             token_consumption=num_tokens_consumed_from_request(
-                                request_json, api_endpoint, token_encoding_name),
+                                request_json, api_endpoint, token_encoding_name
+                            ),
                             attempts_left=max_attempts,
                         )
                         status_tracker.num_tasks_started += 1
                         status_tracker.num_tasks_in_progress += 1
                         logging.debug(
-                            f"Reading request {next_request.task_id}: {next_request}")
+                            f"Reading request {next_request.task_id}: {next_request}"
+                        )
                     except StopIteration:
                         # if file runs out, set flag to stop reading it
                         logging.debug("Read file exhausted")
@@ -183,11 +187,13 @@ async def process_api_requests_from_file(
             current_time = time.time()
             seconds_since_update = current_time - last_update_time
             available_request_capacity = min(
-                available_request_capacity + max_requests_per_minute * seconds_since_update / 60.0,
+                available_request_capacity
+                + max_requests_per_minute * seconds_since_update / 60.0,
                 max_requests_per_minute,
             )
             available_token_capacity = min(
-                available_token_capacity + max_tokens_per_minute * seconds_since_update / 60.0,
+                available_token_capacity
+                + max_tokens_per_minute * seconds_since_update / 60.0,
                 max_tokens_per_minute,
             )
             last_update_time = current_time
@@ -225,24 +231,31 @@ async def process_api_requests_from_file(
 
             # if a rate limit error was hit recently, pause to cool down
             seconds_since_rate_limit_error = (
-                time.time() - status_tracker.time_of_last_rate_limit_error)
+                time.time() - status_tracker.time_of_last_rate_limit_error
+            )
             if seconds_since_rate_limit_error < seconds_to_pause_after_rate_limit_error:
                 remaining_seconds_to_pause = (
-                    seconds_to_pause_after_rate_limit_error - seconds_since_rate_limit_error)
+                    seconds_to_pause_after_rate_limit_error
+                    - seconds_since_rate_limit_error
+                )
                 await asyncio.sleep(remaining_seconds_to_pause)
                 # ^e.g., if pause is 15 seconds and final limit was hit 5 seconds ago
                 logging.warn(
-                    f"Pausing to cool down until {time.ctime(status_tracker.time_of_last_rate_limit_error + seconds_to_pause_after_rate_limit_error)}")
+                    f"Pausing to cool down until {time.ctime(status_tracker.time_of_last_rate_limit_error + seconds_to_pause_after_rate_limit_error)}"
+                )
 
         # after finishing, log final status
         logging.info(
-            f"""Parallel processing complete. Results saved to {save_filepath}""")
+            f"""Parallel processing complete. Results saved to {save_filepath}"""
+        )
         if status_tracker.num_tasks_failed > 0:
             logging.warning(
-                f"{status_tracker.num_tasks_failed} / {status_tracker.num_tasks_started} requests failed. Errors logged to {save_filepath}.")
+                f"{status_tracker.num_tasks_failed} / {status_tracker.num_tasks_started} requests failed. Errors logged to {save_filepath}."
+            )
         if status_tracker.num_rate_limit_errors > 0:
             logging.warning(
-                f"{status_tracker.num_rate_limit_errors} rate limit errors received. Consider running at a lower rate.")
+                f"{status_tracker.num_rate_limit_errors} rate limit errors received. Consider running at a lower rate."
+            )
 
 
 # dataclasses
@@ -301,9 +314,10 @@ class APIRequest:
                     status_tracker.num_rate_limit_errors += 1
                     status_tracker.num_api_errors -= 1
 
-        except Exception as e:  # catching naked exceptions is bad practice, but in this case we'll log & save them
-            logging.warning(
-                f"Request {self.task_id} failed with Exception {e}")
+        except (
+            Exception
+        ) as e:  # catching naked exceptions is bad practice, but in this case we'll log & save them
+            logging.warning(f"Request {self.task_id} failed with Exception {e}")
             status_tracker.num_other_errors += 1
             error = e
         if error:
@@ -312,9 +326,9 @@ class APIRequest:
                 retry_queue.put_nowait(self)
             else:
                 logging.error(
-                    f"Request {self.request_json} failed after all attempts. Saving errors: {self.result}")
-                append_to_jsonl(
-                    [self.request_json, self.result], save_filepath)
+                    f"Request {self.request_json} failed after all attempts. Saving errors: {self.result}"
+                )
+                append_to_jsonl([self.request_json, self.result], save_filepath)
                 status_tracker.num_tasks_in_progress -= 1
                 status_tracker.num_tasks_failed += 1
         else:
@@ -329,7 +343,7 @@ class APIRequest:
 
 def api_endpoint_from_url(request_url):
     """Extract the API endpoint from the request URL."""
-    match = re.search('^https://[^/]+/v\\d+/(.+)$', request_url)
+    match = re.search("^https://[^/]+/v\\d+/(.+)$", request_url)
     return match[1]
 
 
@@ -378,7 +392,8 @@ def num_tokens_consumed_from_request(
                 return num_tokens
             else:
                 raise TypeError(
-                    'Expecting either string or list of strings for "prompt" field in completion request')
+                    'Expecting either string or list of strings for "prompt" field in completion request'
+                )
     # if embeddings request, tokens = input tokens
     elif api_endpoint == "embeddings":
         input = request_json["input"]
@@ -390,11 +405,13 @@ def num_tokens_consumed_from_request(
             return num_tokens
         else:
             raise TypeError(
-                'Expecting either string or list of strings for "inputs" field in embedding request')
+                'Expecting either string or list of strings for "inputs" field in embedding request'
+            )
     # more logic needed to support other API calls (e.g., edits, inserts, DALL-E)
     else:
         raise NotImplementedError(
-            f'API endpoint "{api_endpoint}" not implemented in this script')
+            f'API endpoint "{api_endpoint}" not implemented in this script'
+        )
 
 
 def task_id_generator_function():
@@ -413,21 +430,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--requests_filepath")
     parser.add_argument("--save_filepath", default=None)
-    parser.add_argument(
-        "--request_url", default="https://api.openai.com/v1/embeddings")
+    parser.add_argument("--request_url", default="https://api.openai.com/v1/embeddings")
     parser.add_argument("--api_key", default=os.getenv("OPENAI_API_KEY"))
-    parser.add_argument("--max_requests_per_minute",
-                        type=int, default=3_000 * 0.5)
-    parser.add_argument("--max_tokens_per_minute",
-                        type=int, default=250_000 * 0.5)
+    parser.add_argument("--max_requests_per_minute", type=int, default=3_000 * 0.5)
+    parser.add_argument("--max_tokens_per_minute", type=int, default=250_000 * 0.5)
     parser.add_argument("--token_encoding_name", default="cl100k_base")
     parser.add_argument("--max_attempts", type=int, default=5)
     parser.add_argument("--logging_level", default=logging.INFO)
     args = parser.parse_args()
 
     if args.save_filepath is None:
-        args.save_filepath = args.requests_filepath.replace(
-            ".jsonl", "_results.jsonl")
+        args.save_filepath = args.requests_filepath.replace(".jsonl", "_results.jsonl")
 
     # run script
     asyncio.run(

@@ -1,23 +1,25 @@
-
-
 import praw
-from requests.auth import HTTPBasicAuth
 import requests
+from requests.auth import HTTPBasicAuth
 
 # Reddit app credentials
-client_id = '8nfmaT3Zt1kPSw7FLFfbZg'
-client_secret = 'T2E4wjZSi1CfkjMBYTEoThWaghoE_w'
-user_agent = 'python:RedditCommentScraper:v1.0.0 (by /u/SpoonfulOfBlues)'
-redirect_uri = 'http://localhost:8080'
+client_id = "8nfmaT3Zt1kPSw7FLFfbZg"
+client_secret = "T2E4wjZSi1CfkjMBYTEoThWaghoE_w"
+user_agent = "python:RedditCommentScraper:v1.0.0 (by /u/SpoonfulOfBlues)"
+redirect_uri = "http://localhost:8080"
 
 # Set up Reddit instance with PRAW
-reddit = praw.Reddit(client_id=client_id,
-                     client_secret=client_secret,
-                     user_agent=user_agent,
-                     redirect_uri=redirect_uri)
+reddit = praw.Reddit(
+    client_id=client_id,
+    client_secret=client_secret,
+    user_agent=user_agent,
+    redirect_uri=redirect_uri,
+)
 
 # Step 1: Generate the authorization URL
-auth_url = reddit.auth.url(scopes=['identity', 'read'], state='unique_state', duration='permanent')
+auth_url = reddit.auth.url(
+    scopes=["identity", "read"], state="unique_state", duration="permanent"
+)
 print("Authorization URL: ", auth_url)
 
 # Step 2: Ask the user to enter the full URL they get redirected to (containing the authorization code)
@@ -28,26 +30,22 @@ code = response_url.split("code=")[1].split("#")[0]
 
 # Step 4: Exchange the authorization code for an access token
 auth = HTTPBasicAuth(client_id, client_secret)
-data = {
-    'grant_type': 'authorization_code',
-    'code': code,
-    'redirect_uri': redirect_uri
-}
-headers = {'User-Agent': user_agent}
+data = {"grant_type": "authorization_code", "code": code, "redirect_uri": redirect_uri}
+headers = {"User-Agent": user_agent}
 
-response = requests.post('https://www.reddit.com/api/v1/access_token', auth=auth, data=data, headers=headers)
+response = requests.post(
+    "https://www.reddit.com/api/v1/access_token", auth=auth, data=data, headers=headers
+)
 
 # Step 5: Print the response which contains the access token and refresh token
 print("Response: ", response.json())
 
 # Optionally extract and print the refresh token
-if 'refresh_token' in response.json():
-    refresh_token = response.json().get('refresh_token')
+if "refresh_token" in response.json():
+    refresh_token = response.json().get("refresh_token")
     print("Your Refresh Token: ", refresh_token)
 else:
     print("No Refresh Token found.")
-
-
 
 
 # # # Replace this URL with the URL of the forum page you want to scrape

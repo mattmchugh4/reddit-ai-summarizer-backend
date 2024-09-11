@@ -1,7 +1,10 @@
-import json
 import asyncio
-from api_request_parallel_processor import process_api_requests_from_file
+import json
+
 import tiktoken
+
+from api_request_parallel_processor import process_api_requests_from_file
+
 enc = tiktoken.get_encoding("cl100k_base")
 
 
@@ -24,19 +27,16 @@ async def make_async_chatGPT_request():
     with open("results.jsonl", "r") as f:
         for line in f:
             response = json.loads(line)
-            comments.append(response[0]['messages'][0]['content'])
-            summaries.append(response[1]['choices'][0]['message']['content'])
-    return {'summaries': summaries, 'comments': comments}
-
-
+            comments.append(response[0]["messages"][0]["content"])
+            summaries.append(response[1]["choices"][0]["message"]["content"])
+    return {"summaries": summaries, "comments": comments}
 
 
 def format_chatGPT_inputs(comment_array):
 
     chatGPT_summaries = []
 
-    chatGPT_question = 'Can you concisely summarize the main points for the Reddit comment chain that is pasted below?' \
-        # f'This comment chain is in response to a post titled: {comments["title"]};.'
+    chatGPT_question = "Can you concisely summarize the main points for the Reddit comment chain that is pasted below?"  # f'This comment chain is in response to a post titled: {comments["title"]};.'
     # f'This comment chain is in response to a post ,  Title: {comments["title"]}; Body: {comments["initial_post"]}.'
 
     formatted_requests = []
@@ -52,14 +52,12 @@ def format_chatGPT_inputs(comment_array):
         user_message = chatGPT_question + "\n" + joined_comments
 
         if len(enc.encode(user_message)) > 3500:
-            print('too long')
+            print("too long")
             continue
 
         request_object = {
             "model": "gpt-3.5-turbo",
-            "messages": [
-                {"role": "user", "content": user_message}
-            ]
+            "messages": [{"role": "user", "content": user_message}],
         }
 
         formatted_requests.append(request_object)
