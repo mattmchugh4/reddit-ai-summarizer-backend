@@ -34,7 +34,7 @@ async def make_async_chatGPT_request():
 
 def format_chatGPT_inputs(comment_array):
 
-    chatGPT_summaries = []
+    # chatGPT_summaries = []
 
     chatGPT_question = "Can you concisely summarize the main points for the Reddit comment chain that is pasted below?"  # f'This comment chain is in response to a post titled: {comments["title"]};.'
     # f'This comment chain is in response to a post ,  Title: {comments["title"]}; Body: {comments["initial_post"]}.'

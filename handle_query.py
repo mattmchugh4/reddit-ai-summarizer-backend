@@ -1,10 +1,6 @@
-import asyncio
-
-import httpx
 import openai
 import praw
 import tiktoken
-from flask import jsonify
 
 from chatGPT_input import format_chatGPT_inputs
 from comment_scraper import scrape_comments

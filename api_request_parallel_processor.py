@@ -18,14 +18,14 @@ Features:
 Example command to call script:
 ```
 python examples/api_request_parallel_processor.py \
-  --requests_filepath examples/data/example_requests_to_parallel_process.jsonl \
-  --save_filepath examples/data/example_requests_to_parallel_process_results.jsonl \
-  --request_url https://api.openai.com/v1/embeddings \
-  --max_requests_per_minute 1500 \
-  --max_tokens_per_minute 6250000 \
-  --token_encoding_name cl100k_base \
-  --max_attempts 5 \
-  --logging_level 20
+    --requests_filepath examples/data/example_requests_to_parallel_process.jsonl \
+    --save_filepath examples/data/example_requests_to_parallel_process_results.jsonl \
+    --request_url https://api.openai.com/v1/embeddings \
+    --max_requests_per_minute 1500 \
+    --max_tokens_per_minute 6250000 \
+    --token_encoding_name cl100k_base \
+    --max_attempts 5 \
+    --logging_level 20
 ```
 "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"
 Inputs:
@@ -145,13 +145,13 @@ async def process_api_requests_from_file(
 
     # initialize flags
     file_not_finished = True  # after file is empty, we'll skip reading it
-    logging.debug(f"Initialization complete.")
+    logging.debug("Initialization complete.")
 
     # initialize file reading
     with open(requests_filepath) as file:
         # `requests` will provide requests one at a time
         requests = file.__iter__()
-        logging.debug(f"File opened. Entering main loop")
+        logging.debug("File opened. Entering main loop")
 
         while True:
             # get next request (if one is not already waiting for capacity)
