@@ -2,8 +2,8 @@ import openai
 import praw
 import tiktoken
 
-from chatGPT_input import format_chatGPT_inputs
-from comment_scraper import scrape_comments
+from app.chatGPT_input import format_chatGPT_inputs
+from app.comment_scraper import scrape_comments
 
 enc = tiktoken.get_encoding("cl100k_base")
 
@@ -35,6 +35,8 @@ def send_request(input_message):
         )
 
         response_message = response.choices[0].message.content.strip()
+
+        print(response_message)
         return response_message
     except Exception as e:
         # Handle exceptions appropriately
@@ -60,9 +62,23 @@ def start_query(search_query, emit_processed_data, emit_status_message):
 
     emit_status_message("Summarizing Comment Chains...")
 
-    chatGPT_summaries = format_chatGPT_inputs(comments["formatted_comments"])
+    # chatGPT_summaries = format_chatGPT_inputs(comments["formatted_comments"]) # makes async requests which doesn't work with the current setup
 
-    all_summaries = "\n".join(chatGPT_summaries)
+    #added below code to replace the async function
+    chatGPT_summaries = comments["formatted_comments"]
+    # Flatten the list of lists into a single list and convert all items to strings
+    flattened_summaries = []
+    for summary in chatGPT_summaries:
+        if isinstance(summary, list):
+            flattened_summaries.extend(summary)  # Add items from nested lists
+        else:
+            flattened_summaries.append(summary)  # Add string directly
+
+    # Now join the flattened list into a single string
+    all_summaries = "\n".join(map(str, flattened_summaries))
+
+    # end of added code
+    print(all_summaries)
 
     emit_status_message("Generating Overall Summary...")
 

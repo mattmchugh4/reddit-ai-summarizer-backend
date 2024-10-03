@@ -1,5 +1,7 @@
 import openai
 
+# test openai API request
+
 # Set up your API key
 api_key = "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"
 

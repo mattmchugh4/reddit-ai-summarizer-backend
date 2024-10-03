@@ -3,14 +3,16 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 
 # Import the synchronous wrapper function
-from handle_query import start_query
-from web_search import perform_search
+from app.handle_query import start_query
+from app.web_search import perform_search
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret!"
 CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(
-    app, cors_allowed_origins="*", engineio_logger=True, logger=True, ping_timeout=120
+    # app, cors_allowed_origins="*", engineio_logger=True, logger=True, ping_timeout=120 # logging for debugging
+    app, cors_allowed_origins="*", engineio_logger=False, logger=False, ping_timeout=120
+
 )
 
 
@@ -57,22 +59,22 @@ def handle_request_data(data):
 @socketio.on("connect")
 def connected():
     """event listener when client connects to the server"""
-    print(request.sid)
-    print("client has connected")
+    # print(request.sid)
+    # print("client has connected")
     emit("connect", {"data": f"id: {request.sid} is connected"})
 
 
 @socketio.on("data")
 def handle_message(data):
     """event listener when client types a message"""
-    print("data from the front end: ", str(data))
+    # print("data from the front end: ", str(data))
     emit("data", {"data": data, "id": request.sid}, broadcast=True)
 
 
 @socketio.on("disconnect")
 def disconnected():
     """event listener when client disconnects to the server"""
-    print("user disconnected")
+    # print("user disconnected")
     emit("disconnect", f"user {request.sid} disconnected", broadcast=True)
 
 

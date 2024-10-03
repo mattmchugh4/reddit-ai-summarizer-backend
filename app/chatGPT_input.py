@@ -1,19 +1,24 @@
 import asyncio
 import json
+from pathlib import Path
 
 import tiktoken
 
-from api_request_parallel_processor import process_api_requests_from_file
+from app.api_request_parallel_processor import process_api_requests_from_file
 
 enc = tiktoken.get_encoding("cl100k_base")
 
+data_dir = Path("app") / "data"
+
 
 async def make_async_chatGPT_request():
-    open("results.jsonl", "w").close()
+    results_filepath = data_dir / "results.jsonl"
+
+    results_filepath.write_text("")
 
     await process_api_requests_from_file(
-        requests_filepath="requests_to_process.jsonl",
-        save_filepath="results.jsonl",
+        requests_filepath=data_dir / "requests_to_process.jsonl",
+        save_filepath=results_filepath,
         request_url="https://api.openai.com/v1/chat/completions",
         api_key="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",
         max_requests_per_minute=1500,
@@ -24,7 +29,7 @@ async def make_async_chatGPT_request():
     )
     summaries = []
     comments = []
-    with open("results.jsonl", "r") as f:
+    with results_filepath.open("r") as f:
         for line in f:
             response = json.loads(line)
             comments.append(response[0]["messages"][0]["content"])
@@ -33,6 +38,8 @@ async def make_async_chatGPT_request():
 
 
 def format_chatGPT_inputs(comment_array):
+    data_dir = Path("app") / "data"
+    requests_filepath = data_dir / "requests_to_process.jsonl"
 
     # chatGPT_summaries = []
 
@@ -62,7 +69,7 @@ def format_chatGPT_inputs(comment_array):
 
         formatted_requests.append(request_object)
 
-    with open("requests_to_process.jsonl", "w") as outfile:
+    with requests_filepath.open("w") as outfile:
         for request in formatted_requests:
             outfile.write(json.dumps(request) + "\n")
 
