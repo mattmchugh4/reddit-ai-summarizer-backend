@@ -22,16 +22,24 @@ def open_reddit_connection():
     return praw_connection
 
 
-openai.api_key = "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"
+client = openai.Client(api_key="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")
 
 
 def send_request(input_message):
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo", messages=[{"role": "user", "content": input_message}]
-    )
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": input_message}],
+            max_tokens=1500,  # Adjust based on your needs
+            temperature=1.0,  # Adjust for creativity
+        )
 
-    response_message = response.choices[0].message["content"].strip()
-    return response_message
+        response_message = response.choices[0].message.content.strip()
+        return response_message
+    except Exception as e:
+        # Handle exceptions appropriately
+        print(f"OpenAI API error: {e}")
+        return ""
 
 
 def start_query(search_query, emit_processed_data, emit_status_message):
