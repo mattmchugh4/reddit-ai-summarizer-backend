@@ -36,7 +36,6 @@ def send_request(input_message):
 
         response_message = response.choices[0].message.content.strip()
 
-        print(response_message)
         return response_message
     except Exception as e:
         # Handle exceptions appropriately
@@ -64,7 +63,7 @@ def start_query(search_query, emit_processed_data, emit_status_message):
 
     # chatGPT_summaries = format_chatGPT_inputs(comments["formatted_comments"]) # makes async requests which doesn't work with the current setup
 
-    #added below code to replace the async function
+    # added below code to replace the async function
     chatGPT_summaries = comments["formatted_comments"]
     # Flatten the list of lists into a single list and convert all items to strings
     flattened_summaries = []
@@ -78,8 +77,6 @@ def start_query(search_query, emit_processed_data, emit_status_message):
     all_summaries = "\n".join(map(str, flattened_summaries))
 
     # end of added code
-    print(all_summaries)
-
     emit_status_message("Generating Overall Summary...")
 
     chatGPT_question_overall_summary = (
