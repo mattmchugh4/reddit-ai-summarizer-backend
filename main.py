@@ -2,20 +2,22 @@ from flask import Flask, request
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
-from app.handle_query import start_query
 from app.sockets import register_socket_handlers
+from app.start_query import start_query
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret!"
 CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(
-    # app, cors_allowed_origins="*", engineio_logger=True, logger=True, ping_timeout=120 # logging for debugging
     app,
     cors_allowed_origins="*",
-    engineio_logger=False,
-    logger=False,
+    # engineio_logger=True,
+    # logger=True, # logging for debugging
+    engineio_logger=True,
+    logger=True,
     ping_timeout=120,
 )
+
 
 register_socket_handlers(socketio)
 

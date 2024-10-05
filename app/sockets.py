@@ -1,7 +1,7 @@
 from flask import request
 from flask_socketio import emit
 
-from app.handle_query import start_query
+from app.start_query import start_query
 from app.web_search import perform_search
 
 
