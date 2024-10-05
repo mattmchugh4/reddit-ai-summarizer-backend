@@ -1,9 +1,12 @@
+# import eventlet
 from flask import Flask, request
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
 from app.sockets import register_socket_handlers
 from app.start_query import start_query
+
+# eventlet.monkey_patch()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret!"

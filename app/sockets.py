@@ -26,9 +26,10 @@ def register_socket_handlers(socketio):
         )
 
     @socketio.on("connect")
-    def connected():
+    def handle_connect():
         """Event listener when client connects to the server"""
-        emit("connect", {"data": f"id: {request.sid} is connected"})
+        print(f"Client connected: {request.sid}")
+        emit("connected", {"data": f"id: {request.sid} is connected"})
 
     @socketio.on("data")
     def handle_message(data):
@@ -36,6 +37,7 @@ def register_socket_handlers(socketio):
         emit("data", {"data": data, "id": request.sid}, broadcast=True)
 
     @socketio.on("disconnect")
-    def disconnected():
+    def handle_disconnect():
         """Event listener when client disconnects to the server"""
-        emit("disconnect", f"user {request.sid} disconnected", broadcast=True)
+        print(f"Client disconnected: {request.sid}")
+        emit("disconnected", f"user {request.sid} disconnected", broadcast=True)
