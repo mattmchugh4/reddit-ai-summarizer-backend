@@ -3,12 +3,12 @@ import openai
 client = openai.Client(api_key="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")
 
 
-def send_chatgpt_request(input_message):
+def send_chatgpt_request(messages):
     try:
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": input_message}],
-            max_tokens=1500,  # Adjust based on your needs
+            model="gpt-4o",
+            messages=messages,
+            max_tokens=100_000,  # Adjust based on your needs
             temperature=1.0,  # Adjust for creativity
         )
 

@@ -15,12 +15,14 @@ def register_socket_handlers(socketio):
             search_query, lambda result: emit("search_result", {"result": result})
         )
 
-    @socketio.on("searchUrl")
+    @socketio.on("searchUrlAndQuestion")
     def handle_request_data(data):
         input_url = data.get("inputUrl")
+        user_question = data.get("userQuestion")
 
         start_query(
             input_url,
+            user_question,
             lambda processed_data: emit("comment-data", processed_data),
             lambda status_message: emit("status-message", status_message),
         )

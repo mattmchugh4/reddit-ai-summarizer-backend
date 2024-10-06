@@ -10,7 +10,7 @@ from app.send_chatgpt_request import send_chatgpt_request
 enc = tiktoken.get_encoding("cl100k_base")
 
 
-def start_query(search_query, emit_processed_data, emit_status_message):
+def start_query(search_query, user_question, emit_processed_data, emit_status_message):
     response_object = {}
 
     praw_connection = open_reddit_connection()
@@ -44,16 +44,38 @@ def start_query(search_query, emit_processed_data, emit_status_message):
     all_summaries = "\n".join(map(str, flattened_summaries))
 
     # end of added code
-    emit_status_message("Generating Overall Summary...")
+    emit_status_message("Generating Answer...")
 
-    chatGPT_question_overall_summary = (
-        "Can you analyze these summaries of Reddit post comment chains and provide me an overall summary of the post?"
-        + "\n"
-        + all_summaries
-    )
-    response_object["tokens"] += len(enc.encode(chatGPT_question_overall_summary))
+    # Prepare the input_message
+    system_message = "You are an AI assistant that provides helpful answers based on Reddit discussions."
 
-    overall_summary = send_chatgpt_request(chatGPT_question_overall_summary)
+    user_message = f"""
+**Reddit Post Title:**
+{comments["title"]}
+
+**Reddit Post Content:**
+{comments["initial_post"]}
+
+**Summarized Comments:**
+{all_summaries}
+
+Based on this Reddit discussion, please answer the following question:
+
+**User Question:**
+{user_question}
+
+Your answer should summarize the relevant information from the Reddit data and provide additional context or insights as needed. Use markdown formatting to structure your response.
+"""
+
+    # Construct the messages list
+    messages = [
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": user_message}
+    ]
+
+    response_object["tokens"] += len(enc.encode(system_message)) + len(enc.encode(user_message))
+
+    overall_summary = send_chatgpt_request(messages)
     response_object["tokens"] += len(enc.encode(overall_summary))
 
     response_object["summaries"] = chatGPT_summaries
