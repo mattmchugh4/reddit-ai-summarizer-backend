@@ -3,7 +3,9 @@ import eventlet
 eventlet.monkey_patch()
 
 import logging  # noqa: E402
+import os  # noqa: E402
 
+from dotenv import load_dotenv  # noqa: E402
 from flask import Flask, request  # noqa: E402
 from flask_cors import CORS  # noqa: E402
 from flask_socketio import SocketIO  # noqa: E402
@@ -11,8 +13,14 @@ from flask_socketio import SocketIO  # noqa: E402
 from app.sockets import register_socket_handlers  # noqa: E402
 from app.start_query import start_query  # noqa: E402
 
+load_dotenv()
+
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "secret!"
+app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY")
+
+if not app.config["SECRET_KEY"]:
+    raise ValueError("No SECRET_KEY set for Flask application")
+
 CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(
     app,

@@ -1,8 +1,16 @@
 import logging
+import os
 
 import openai
+from dotenv import load_dotenv
 
-client = openai.Client(api_key="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")
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
+
+# Initialize OpenAI client
+if not api_key:
+    raise EnvironmentError("OPENAI_API_KEY is not set in the environment")
+client = openai.Client(api_key=api_key)
 logger = logging.getLogger(__name__)  # Use the logger configured globally
 
 
