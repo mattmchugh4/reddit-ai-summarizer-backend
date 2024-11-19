@@ -70,10 +70,12 @@ Your answer should summarize the relevant information from the Reddit data and p
     # Construct the messages list
     messages = [
         {"role": "system", "content": system_message},
-        {"role": "user", "content": user_message}
+        {"role": "user", "content": user_message},
     ]
 
-    response_object["tokens"] += len(enc.encode(system_message)) + len(enc.encode(user_message))
+    response_object["tokens"] += len(enc.encode(system_message)) + len(
+        enc.encode(user_message)
+    )
 
     overall_summary = send_chatgpt_request(messages)
     response_object["tokens"] += len(enc.encode(overall_summary))
@@ -82,3 +84,4 @@ Your answer should summarize the relevant information from the Reddit data and p
     response_object["overall_summary"] = overall_summary
 
     emit_processed_data(response_object)
+    emit_status_message("Response complete")

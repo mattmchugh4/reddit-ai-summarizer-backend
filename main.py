@@ -1,12 +1,15 @@
-# import eventlet
-from flask import Flask, request
-from flask_cors import CORS
-from flask_socketio import SocketIO
+import eventlet
 
-from app.sockets import register_socket_handlers
-from app.start_query import start_query
+eventlet.monkey_patch()
 
-# eventlet.monkey_patch()
+import logging  # noqa: E402
+
+from flask import Flask, request  # noqa: E402
+from flask_cors import CORS  # noqa: E402
+from flask_socketio import SocketIO  # noqa: E402
+
+from app.sockets import register_socket_handlers  # noqa: E402
+from app.start_query import start_query  # noqa: E402
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret!"
@@ -14,11 +17,11 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
-    # engineio_logger=True,
-    # logger=True, # logging for debugging
+    # Change for debugging
     engineio_logger=True,
     logger=True,
     ping_timeout=120,
+    async_mode="eventlet",  # Use Eventlet for async support
 )
 
 
@@ -46,3 +49,11 @@ if __name__ == "__main__":
     socketio.run(app, debug=True, port=5001)
 
     # app.run(debug=True, port=5000)
+
+logging.basicConfig(
+    level=logging.DEBUG,  # Set the logging level
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+
+logger = logging.getLogger(__name__)
