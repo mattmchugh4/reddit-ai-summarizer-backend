@@ -3,13 +3,15 @@ import os
 
 import eventlet
 
+from app.web_search import perform_search
+
 eventlet.monkey_patch()
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-from flask import Flask, request
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
@@ -63,6 +65,26 @@ def http_call():
     except ConnectionRefusedError as e:
         logger.error("Connection refused: %s", e)
         raise e
+
+
+@app.route("/search", methods=["POST"])
+def search_route():
+    """
+    Example usage:
+    POST /search
+    JSON Body: {"query": "python web scraping"}
+    """
+    data = request.get_json()
+    if not data or "query" not in data:
+        return jsonify({"error": "Missing 'query' in JSON body"}), 400
+
+    search_query = data["query"]
+    try:
+        results = perform_search(search_query)
+        return jsonify({"results": results})
+    except Exception as e:
+        logger.error(f"Search failed: {e}")
+        return jsonify({"error": "Search failed"}), 500
 
 
 if __name__ == "__main__":
