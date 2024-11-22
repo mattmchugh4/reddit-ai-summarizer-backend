@@ -4,7 +4,6 @@ from app.comment_scraper import scrape_comments
 from app.open_reddit_connection import open_reddit_connection
 from app.send_chatgpt_request import send_chatgpt_request
 
-# from app.chatGPT_input import format_chatGPT_inputs
 
 
 enc = tiktoken.get_encoding("cl100k_base")
@@ -27,8 +26,6 @@ def start_query(search_query, user_question, emit_processed_data, emit_status_me
     response_object["tokens"] = 0
 
     emit_status_message("Summarizing Comment Chains...")
-
-    # chatGPT_summaries = format_chatGPT_inputs(comments["formatted_comments"]) # makes async requests which doesn't work with the current setup
 
     # added below code to replace the async function
     chatGPT_summaries = comments["formatted_comments"]

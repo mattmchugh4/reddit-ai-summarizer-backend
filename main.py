@@ -1,19 +1,31 @@
+import logging
+
 import eventlet
 
 eventlet.monkey_patch()
 
-import logging  # noqa: E402
-import os  # noqa: E402
+import os
 
-from dotenv import load_dotenv  # noqa: E402
-from flask import Flask, request  # noqa: E402
-from flask_cors import CORS  # noqa: E402
-from flask_socketio import SocketIO  # noqa: E402
+from dotenv import load_dotenv
+from flask import Flask, request
+from flask_cors import CORS
+from flask_socketio import SocketIO
 
-from app.sockets import register_socket_handlers  # noqa: E402
-from app.start_query import start_query  # noqa: E402
+from app.sockets import register_socket_handlers
+from app.start_query import start_query
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
+
+LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG").upper()
+logging.basicConfig(
+    level=LOG_LEVEL,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+# Enable Socket.IO debugging only if LOG_LEVEL is "DEBUG"
+SOCKETIO_DEBUG = LOG_LEVEL == "DEBUG"
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY")
@@ -26,8 +38,8 @@ socketio = SocketIO(
     app,
     cors_allowed_origins="*",
     # Change for debugging
-    engineio_logger=True,
-    logger=True,
+    engineio_logger=SOCKETIO_DEBUG,
+    logger=SOCKETIO_DEBUG,
     ping_timeout=120,
     async_mode="eventlet",  # Use Eventlet for async support
 )
@@ -38,10 +50,11 @@ register_socket_handlers(socketio)
 
 @app.errorhandler(ConnectionRefusedError)
 def connection_refused_error_handler(error):
-    print("Connection refused:", error)
+    logger.error("Connection refused: %s", error)
     return "", 500
 
 
+# todo rename all of this
 @app.route("/http-call", methods=["POST"])
 def http_call():
     try:
@@ -49,19 +62,9 @@ def http_call():
         processed_data = start_query(data)
         return processed_data
     except ConnectionRefusedError as e:
-        print("Connection refused:", e)
+        logger.error("Connection refused: %s", e)
         raise e
 
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True, port=5001)
-
-    # app.run(debug=True, port=5000)
-
-logging.basicConfig(
-    level=logging.DEBUG,  # Set the logging level
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[logging.StreamHandler()],
-)
-
-logger = logging.getLogger(__name__)
+    socketio.run(app, debug=SOCKETIO_DEBUG, port=5001)
