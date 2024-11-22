@@ -34,7 +34,7 @@ def register_socket_handlers(socketio):
     @socketio.on("connect")
     def handle_connect():
         """Event listener when client connects to the server"""
-        logger.info(f"Client connected: {request.sid}") 
+        logger.info(f"Client connected: {request.sid}")
         emit("connected", {"data": f"id: {request.sid} is connected"})
 
     @socketio.on("data")

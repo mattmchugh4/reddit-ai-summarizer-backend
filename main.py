@@ -1,12 +1,14 @@
 import logging
+import os
 
 import eventlet
 
 eventlet.monkey_patch()
 
-import os
-
 from dotenv import load_dotenv
+
+load_dotenv()
+
 from flask import Flask, request
 from flask_cors import CORS
 from flask_socketio import SocketIO
@@ -14,16 +16,13 @@ from flask_socketio import SocketIO
 from app.sockets import register_socket_handlers
 from app.start_query import start_query
 
-logger = logging.getLogger(__name__)
-
-load_dotenv()
-
 LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG").upper()
 logging.basicConfig(
     level=LOG_LEVEL,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[logging.StreamHandler()],
 )
+logger = logging.getLogger(__name__)
 # Enable Socket.IO debugging only if LOG_LEVEL is "DEBUG"
 SOCKETIO_DEBUG = LOG_LEVEL == "DEBUG"
 

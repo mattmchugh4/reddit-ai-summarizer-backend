@@ -1,40 +1,3 @@
-# import praw
-
-
-# client_id = '8nfmaT3Zt1kPSw7FLFfbZg'
-# client_secret = 'T2E4wjZSi1CfkjMBYTEoThWaghoE_w'
-# user_agent = 'python:RedditCommentScraper:v1.0.0 (by /u/SpoonfulOfBlues)'
-# refresh_token = '73131276-pKb3q5pYU0EyoMkNrt-M0-IKUA-e1g'
-# reddit = praw.Reddit(client_id=client_id,
-#                      client_secret=client_secret,
-#                      refresh_token=refresh_token,
-#                      user_agent=user_agent)
-
-
-# function that prints all comments in easy to read format
-# def print_comment(comment, depth=0):
-#     print("  " * depth, comment.body)
-#     print("  " * depth, comment.score)
-#     print("  " * depth, "_____________________________________________________________________________________________________________________")
-#     print()
-
-#     for reply in comment.replies:
-#         print_comment(reply, depth + 1)
-
-
-# def scrape_comments(reddit, post_url):
-#     post_id = post_url.split('/')[-3]
-#     post = reddit.submission(id=post_id)
-
-#     # Replace "more_comments" with actual comments
-#     post.comments.replace_more(limit=None)
-
-#     for comment in post.comments:
-#         print_comment(comment)
-#         print("======================================== Comment Chain End ========================================")
-#         print()
-
-#     return post.comments
 from datetime import datetime
 
 import tiktoken
@@ -106,12 +69,4 @@ def scrape_comments(reddit, post_url):
     comments["formatted_comments"] = formatted_comments
     comments["comment_strings"] = comment_string_split
 
-    for comment in formatted_comments:
-        print(comment)
-        print("\n")
-
     return comments
-
-
-# comments = scrape_comments(
-#     reddit, 'https://www.reddit.com/r/whatcarshouldIbuy/comments/ri1d1e/whats_the_best_bang_for_your_buck_cars_that_are/')
