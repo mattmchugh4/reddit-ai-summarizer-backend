@@ -1,9 +1,5 @@
 from datetime import datetime
 
-import tiktoken
-
-enc = tiktoken.get_encoding("cl100k_base")
-
 
 def format_comment(comment, depth=0):
 
@@ -37,7 +33,6 @@ def scrape_comments(reddit, post_url):
     formatted_comments = []
     comment_string_split = []
     comment_string = ""
-    tokens = 0
 
     for comment in post.comments:
         comment_string += "__break__\n"
@@ -46,12 +41,6 @@ def scrape_comments(reddit, post_url):
 
         for new_comment in new_comment_chain:
             comment_string += new_comment + " "
-            # tokens += len(enc.encode(new_comment))
-
-        tokens = len(enc.encode(comment_string))
-        if tokens > 2000:
-            comment_string_split.append(comment_string)
-            comment_string = ""
 
         comment_string += "\n"
 

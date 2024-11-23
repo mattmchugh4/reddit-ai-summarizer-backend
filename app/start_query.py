@@ -6,9 +6,6 @@ from app.send_chatgpt_request import (
     send_chatgpt_request,
 )
 
-# enc = tiktoken.get_encoding("cl100k_base")
-
-
 def start_query(search_query, user_question, emit_processed_data, emit_status_message):
     response_object = {}
 
