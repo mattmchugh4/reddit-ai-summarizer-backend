@@ -3,8 +3,6 @@ import os
 
 import eventlet
 
-from app.web_search import perform_search
-
 eventlet.monkey_patch()
 
 from dotenv import load_dotenv
@@ -17,6 +15,7 @@ from flask_socketio import SocketIO
 
 from app.sockets import register_socket_handlers
 from app.start_query import start_query
+from app.web_search import perform_search
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG").upper()
 logging.basicConfig(
