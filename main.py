@@ -1,5 +1,7 @@
 import logging
 import os
+import signal
+import sys
 
 import eventlet
 
@@ -7,17 +9,17 @@ eventlet.monkey_patch()
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
 from app.sockets import register_socket_handlers
-from app.start_query import start_query
 from app.web_search import perform_search
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG").upper()
+print(f"LOG_LEVEL: {LOG_LEVEL}")
 logging.basicConfig(
     level=LOG_LEVEL,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -54,18 +56,6 @@ def connection_refused_error_handler(error):
     return "", 500
 
 
-# todo rename all of this
-@app.route("/http-call", methods=["POST"])
-def http_call():
-    try:
-        data = request.json.get("data")
-        processed_data = start_query(data)
-        return processed_data
-    except ConnectionRefusedError as e:
-        logger.error("Connection refused: %s", e)
-        raise e
-
-
 @app.route("/search", methods=["POST"])
 def search_route():
     """
@@ -85,6 +75,20 @@ def search_route():
         logger.error(f"Search failed: {e}")
         return jsonify({"error": "Search failed"}), 500
 
+
+# Graceful shutdown handling
+def handle_shutdown(signal, frame):
+    """Handle application shutdown."""
+    print("\nShutting down gracefully...")
+    logger.info("Cleaning up resources...")
+    # Add any cleanup logic here, e.g., closing database connections
+    socketio.stop()  # Stop the SocketIO server
+    sys.exit(0)
+
+
+# Register signal handlers
+signal.signal(signal.SIGINT, handle_shutdown)  # Handle Ctrl+C
+signal.signal(signal.SIGTERM, handle_shutdown)  # Handle termination signals
 
 if __name__ == "__main__":
     socketio.run(app, debug=SOCKETIO_DEBUG, port=5001)

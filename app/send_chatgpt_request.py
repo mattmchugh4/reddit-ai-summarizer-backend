@@ -13,24 +13,31 @@ if not api_key:
 client = openai.Client(api_key=api_key)
 
 
-def send_chatgpt_request(messages):
+def send_chatgpt_request(messages, emit_stream):
     try:
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=messages,
             max_tokens=16384,
             temperature=1.0,
-            # stream=True,
+            stream=True,
         )
 
-        response_message = response.choices[0].message.content.strip()
+        response_message = ""
+        for chunk in response:
+            logger.debug(f"Streamed chunk: {chunk}")
 
-        return response_message
+            # Extract content safely
+            if hasattr(chunk, "choices") and len(chunk.choices) > 0:
+                delta = getattr(chunk.choices[0].delta, "content", "")
+                response_message += str(delta) if delta else ""
+                emit_stream(delta)
 
-    except Exception:
-        # Handle exceptions appropriately
-        logger.error("OpenAI API error occurred", exc_info=True)
-        return ""
+        return response_message.strip()
+
+    except Exception as e:
+        logger.error(f"Error sending ChatGPT request: {e}")
+        raise
 
 
 def flatten_summaries(summaries):
@@ -58,7 +65,7 @@ def construct_messages(comments, all_summaries, user_question):
         f"**Summarized Comments:**\n{all_summaries}\n\n"
         "Based on this Reddit discussion, please answer the following question:\n\n"
         f"**User Question:**\n{user_question}\n\n"
-        "Your answer should summarize the relevant information from the Reddit data and provide additional context or insights as needed. Use markdown formatting to structure your response."
+        "Your answer should summarize the relevant information from the Reddit data and provide additional context or insights as needed. Be specific and refer directly to information from the reddit post. Use markdown formatting to structure your response."
     )
 
     return [

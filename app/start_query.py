@@ -6,7 +6,8 @@ from app.send_chatgpt_request import (
     send_chatgpt_request,
 )
 
-def start_query(search_query, user_question, emit_processed_data, emit_status_message):
+
+def start_query(search_query, user_question, emit_processed_data, emit_status_message, emit_stream):
     response_object = {}
 
     praw_connection = open_reddit_connection()
@@ -33,7 +34,7 @@ def start_query(search_query, user_question, emit_processed_data, emit_status_me
     emit_status_message("Generating Answer...")
     messages = construct_messages(comments, all_summaries, user_question)
 
-    overall_summary = send_chatgpt_request(messages)
+    overall_summary = send_chatgpt_request(messages, emit_stream)
 
     response_object["summaries"] = chatGPT_summaries
     response_object["overall_summary"] = overall_summary
