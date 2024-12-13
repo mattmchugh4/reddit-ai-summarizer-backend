@@ -7,7 +7,7 @@ from fake_useragent import UserAgent
 
 logger = logging.getLogger(__name__)
 
-
+# none of this is used, idk what I should do with it, maybe delete it
 def get_google_search_results(url):
     logger.info(f"Starting search with URL: {url}")
 

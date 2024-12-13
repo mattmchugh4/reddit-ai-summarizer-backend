@@ -90,5 +90,7 @@ def handle_shutdown(signal, frame):
 signal.signal(signal.SIGINT, handle_shutdown)  # Handle Ctrl+C
 signal.signal(signal.SIGTERM, handle_shutdown)  # Handle termination signals
 
+
 if __name__ == "__main__":
-    socketio.run(app, debug=SOCKETIO_DEBUG, port=5001)
+    port = int(os.getenv("PORT"))
+    socketio.run(app, debug=SOCKETIO_DEBUG, port=port)

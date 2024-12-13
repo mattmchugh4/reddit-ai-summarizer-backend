@@ -7,9 +7,10 @@ from app.send_chatgpt_request import (
 )
 
 
-def start_query(search_query, user_question, emit_processed_data, emit_status_message, emit_stream):
+def start_query(
+    search_query, user_question, emit_processed_data, emit_status_message, emit_stream
+):
     response_object = {}
-
     praw_connection = open_reddit_connection()
 
     emit_status_message("Scraping comments...")
