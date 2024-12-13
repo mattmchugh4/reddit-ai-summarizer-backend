@@ -76,6 +76,11 @@ def search_route():
         return jsonify({"error": "Search failed"}), 500
 
 
+@app.route("/", methods=["GET"])
+def health_check():
+    return jsonify({"status": "ok", "message": "Server is running"}), 200
+
+
 # Graceful shutdown handling
 def handle_shutdown(signal, frame):
     """Handle application shutdown."""
