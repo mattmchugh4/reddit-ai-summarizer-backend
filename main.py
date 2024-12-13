@@ -96,7 +96,7 @@ signal.signal(signal.SIGINT, handle_shutdown)  # Handle Ctrl+C
 signal.signal(signal.SIGTERM, handle_shutdown)  # Handle termination signals
 
 logger.info("Starting server...")
-logger.debug(port=int(os.getenv("PORT")))
+logger.debug(os.getenv("PORT"))
 if __name__ == "__main__":
     port = int(os.getenv("PORT"))
     socketio.run(app, debug=SOCKETIO_DEBUG, host="0.0.0.0", port=port)
