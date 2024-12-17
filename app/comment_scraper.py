@@ -29,7 +29,7 @@ def scrape_comments(reddit, post_url):
     # Replace "more_comments" with actual comments
     post.comments.replace_more(limit=None)
 
-    comments = {}
+    post_data = {}
     formatted_comments = []
     comment_string_split = []
     comment_string = ""
@@ -46,16 +46,16 @@ def scrape_comments(reddit, post_url):
 
     comment_string_split.append(comment_string)
 
-    comments["title"] = post.title
-    comments["initial_post"] = post.selftext
+    post_data["title"] = post.title
+    post_data["initial_post"] = post.selftext
 
     post_date = post.created_utc
 
     post_date_formatted = datetime.utcfromtimestamp(post_date).strftime("%m/%d/%Y")
 
-    comments["post_date"] = post_date_formatted
+    post_data["post_date"] = post_date_formatted
 
-    comments["formatted_comments"] = formatted_comments
-    comments["comment_strings"] = comment_string_split
+    post_data["formatted_comments"] = formatted_comments
+    post_data["comment_strings"] = comment_string_split
 
-    return comments
+    return post_data

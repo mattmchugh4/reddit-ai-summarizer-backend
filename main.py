@@ -86,7 +86,7 @@ def handle_shutdown(signal, frame):
     """Handle application shutdown."""
     print("\nShutting down gracefully...")
     logger.info("Cleaning up resources...")
-    # Add any cleanup logic here, e.g., closing database connections
+
     socketio.stop()  # Stop the SocketIO server
     sys.exit(0)
 

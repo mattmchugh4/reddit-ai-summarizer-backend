@@ -30,6 +30,7 @@ def register_socket_handlers(socketio):
             lambda processed_data: emit("comment-data", processed_data),
             lambda status_message: emit("status-message", status_message),
             lambda stream_chunk: emit("stream-response", stream_chunk),
+            lambda post_data: emit("post-data", post_data),
         )
 
     @socketio.on("connect")
