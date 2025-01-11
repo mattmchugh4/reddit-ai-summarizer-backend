@@ -1,9 +1,10 @@
 import openai
+import os
 
 # test openai API request
 
 # Set up your API key
-api_key = "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"
+api_key = os.getenv("OPENAI_API_KEY")
 
 # Create a client instance with the API key
 client = openai.Client(api_key=api_key)
