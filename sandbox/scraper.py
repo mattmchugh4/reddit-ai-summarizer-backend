@@ -1,12 +1,15 @@
+import os
 import praw
 import requests
 from requests.auth import HTTPBasicAuth
 
-# Reddit app credentials
-client_id = "8nfmaT3Zt1kPSw7FLFfbZg"
-client_secret = "T2E4wjZSi1CfkjMBYTEoThWaghoE_w"
-user_agent = "python:RedditCommentScraper:v1.0.0 (by /u/SpoonfulOfBlues)"
-redirect_uri = "http://localhost:8080"
+# Load environment variables
+client_id = os.getenv("REDDIT_CLIENT_ID")
+client_secret = os.getenv("REDDIT_CLIENT_SECRET")
+user_agent = os.getenv("REDDIT_USER_AGENT")
+redirect_uri = os.getenv(
+    "REDIRECT_URI", "http://localhost:8080"
+)  # Default to localhost
 
 # Set up Reddit instance with PRAW
 reddit = praw.Reddit(
