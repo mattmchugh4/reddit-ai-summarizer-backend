@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  flask-app:
+    image: localhost/flask-websocket-app:latest
+    ports:
+      - '5001:5001'
+    # volumes:
+    # No volumes mounted
+    env_file: .env
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure

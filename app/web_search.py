@@ -86,7 +86,7 @@ def perform_search(search_query):
     return results
 
 
-print(perform_search("this is a test"))
+# print(perform_search("this is a test"))
 
 # def get_google_search_results(url):
 #     user_agent = UserAgent()

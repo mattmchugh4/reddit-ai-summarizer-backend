@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  flask-app:
+    image: ${REGISTRY_NAME:-localhost}/flask-websocket-app:latest
+    build: .
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./app:/app
+    environment:
+      - FLASK_ENV=production
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
