@@ -10,8 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 def register_socket_handlers(socketio):
+    # Create new namespace instance
+    reddit_summarizer_namespace = socketio.namespace("/api/reddit-summarizer/ws/")
 
-    @socketio.on("search")
+    @reddit_summarizer_namespace.on("search")
     def run_search(data):
         search_query = data.get("searchQuery")
 
@@ -19,7 +21,7 @@ def register_socket_handlers(socketio):
             search_query, lambda result: emit("search_result", {"result": result})
         )
 
-    @socketio.on("searchUrlAndQuestion")
+    @reddit_summarizer_namespace.on("searchUrlAndQuestion")
     def handle_request_data(data):
         input_url = data.get("inputUrl")
         user_question = data.get("userQuestion")
@@ -33,18 +35,18 @@ def register_socket_handlers(socketio):
             lambda post_data: emit("post-data", post_data),
         )
 
-    @socketio.on("connect")
+    @reddit_summarizer_namespace.on("connect")
     def handle_connect():
         """Event listener when client connects to the server"""
         logger.info(f"Client connected: {request.sid}")
         emit("connected", {"data": f"id: {request.sid} is connected"})
 
-    @socketio.on("data")
+    @reddit_summarizer_namespace.on("data")
     def handle_message(data):
         """Event listener when client types a message"""
         emit("data", {"data": data, "id": request.sid}, broadcast=True)
 
-    @socketio.on("disconnect")
+    @reddit_summarizer_namespace.on("disconnect")
     def handle_disconnect():
         """Event listener when client disconnects to the server"""
         logger.info(f"Client disconnected: {request.sid}")
